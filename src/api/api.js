@@ -5,3 +5,12 @@ export async function getProdutos() {
     const res = await fetch(`${API_URL}/api/produtos`);
     return res.json();
 }
+
+
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "https://backend-lojacelulares.onrender.com", // 🔗 coloque aqui o link do seu backend no Render
+});
+
+export default api;

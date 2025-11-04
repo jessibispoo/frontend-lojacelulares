@@ -1,50 +1,42 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import api from "../api/api";
 
-function Login({ onLogin }) {
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
-    const [erro, setErro] = useState("");
+const Login: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+  const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post("http://localhost:8000/login", { email, senha });
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await api.post("/auth/login", { email, senha });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("tipo", res.data.tipo);
+      navigate("/"); // ou rota desejada
+    } catch {
+      setErro("E-mail ou senha inválidos");
+    }
+  };
 
-            const { token, tipo } = response.data;
-
-            // Armazena no localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("tipo", tipo);
-
-            onLogin(tipo);
-        } catch (err) {
-            setErro("Credenciais inválidas");
-        }
-    };
-
-    return (
-        <div className="login-container">
-            <h2>Login</h2>
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Senha"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                />
-                <button type="submit">Entrar</button>
-            </form>
-            {erro && <p style={{ color: "red" }}>{erro}</p>}
+  return (
+    <div style={{ maxWidth: 420, margin: "2rem auto" }}>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label>E-mail</label><br />
+          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-    );
-}
+        <div style={{ marginTop: 8 }}>
+          <label>Senha</label><br />
+          <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
+        </div>
+        <button style={{ marginTop: 12 }} type="submit">Entrar</button>
+      </form>
+      {erro && <p style={{ color: "red" }}>{erro}</p>}
+    </div>
+  );
+};
 
 export default Login;
-//parte ana luiza
