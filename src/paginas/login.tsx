@@ -1,42 +1,47 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState("");
+function Login() {
+  const [searchParams] = useSearchParams();
+  const mensagem = searchParams.get("mensagem");
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await api.post("/auth/login", { email, senha });
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("tipo", res.data.tipo);
-      navigate("/"); // ou rota desejada
-    } catch {
-      setErro("E-mail ou senha inválidos");
-    }
-  };
+  async function handleForm(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "");
+    const senha = String(formData.get("senha") ?? "");
+
+    try {
+      const response = await api.post("/login", { email, senha });
+
+      if (response.status === 200) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("tipo", response.data.tipo);
+        localStorage.setItem("nome", response.data.nome ?? "");
+        navigate("/"); // redireciona após login
+      }
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.mensagem ??
+        error?.message ??
+        "Erro ao fazer login.";
+      navigate(`/login?mensagem=${encodeURIComponent(msg)}`);
+    }
+  }
   return (
-    <div style={{ maxWidth: 420, margin: "2rem auto" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>E-mail</label><br />
-          <input value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div style={{ marginTop: 8 }}>
-          <label>Senha</label><br />
-          <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
-        </div>
-        <button style={{ marginTop: 12 }} type="submit">Entrar</button>
+    <>
+      {mensagem && <p>{mensagem}</p>}
+      <form onSubmit={handleForm}>
+        <input type="text" name="email" placeholder="Email" />
+        <input type="password" name="senha" placeholder="Senha" />
+        <input type="submit" value="Logar" />
       </form>
-      {erro && <p style={{ color: "red" }}>{erro}</p>}
-    </div>
+    </>
   );
-};
+
+}
 
 export default Login;

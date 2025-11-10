@@ -1,43 +1,58 @@
-import React, { useEffect, useState } from "react";
-import api from "../api/api";
+import { useEffect, useState } from "react";
+import api from "../api";
 
-interface Produto { _id: string; nome: string; categoria: string; preco: number; }
+interface Produto {
+  id: number;
+  nome: string;
+  categoria: string;
+  preco: number;
+}
 
-const Produtos: React.FC = () => {
+export default function Produtos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [busca, setBusca] = useState("");
 
-  useEffect(() => {
-    const delayFetch = setTimeout(() => {
-      buscar(busca);
-    }, 300); // debounce simples
-    return () => clearTimeout(delayFetch);
-  }, [busca]);
-
-  const buscar = async (q = "") => {
-    try {
-      const res = await api.get(`/api/produtos/buscar?q=${encodeURIComponent(q)}`);
-      setProdutos(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+  const carregar = async () => {
+    const res = await api.get(`/produtos?busca=${busca}`);
+    setProdutos(res.data);
   };
 
-  useEffect(() => { buscar(); }, []);
+  useEffect(() => {
+    carregar();
+  }, [busca]);
+
+  const remover = async (id: number) => {
+    await api.delete(`/carrinho/${id}`);
+    alert("Item removido do carrinho!");
+  };
+
+  //parte jessica 
+  {user?.role === "admin" && (
+  <button
+    onClick={() => handleDelete(produto._id)}
+    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+  >
+    Excluir
+  </button>
+)}
+///////
 
   return (
-    <div style={{ padding: 16 }}>
+    <div className="container">
       <h2>Produtos</h2>
-      <input placeholder="Buscar por nome ou categoria" value={busca} onChange={(e) => setBusca(e.target.value)} style={{ width: "100%", padding: 8, marginBottom: 12 }} />
+      <input
+        placeholder="Buscar por nome ou categoria..."
+        value={busca}
+        onChange={e => setBusca(e.target.value)}
+      />
       <ul>
         {produtos.map(p => (
-          <li key={p._id}>
-            <strong>{p.nome}</strong> — {p.categoria} — R$ {p.preco}
+          <li key={p.id}>
+            {p.nome} - {p.categoria} - R${p.preco}{" "}
+            <button onClick={() => remover(p.id)}>Remover</button>
           </li>
         ))}
       </ul>
     </div>
   );
-};
-
-export default Produtos;
+}

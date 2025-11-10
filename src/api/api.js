@@ -10,7 +10,8 @@ export async function getProdutos() {
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://backend-lojacelulares.onrender.com", // 🔗 coloque aqui o link do seu backend no Render
+  baseURL: "https://backend-lojacelulares.onrender.com", // 🔗 o link do seu backend no Render
 });
 
 export default api;
+

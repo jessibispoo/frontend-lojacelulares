@@ -24,22 +24,6 @@ const Carrinho: React.FC = () => {
   };
   // Calcula o total do carrinho
   const total = itens.reduce((s, it) => s + it.preco * (it.quantidade || 1), 0);
+}
 
-  return (
-    <div style={{ padding: 16 }}>
-      <h2>Carrinho</h2>
-      <ul>
-        {itens.map(it => (
-          <li key={it.idProduto}>
-            {it.nome} - R$ {it.preco.toFixed(2)} x {it.quantidade}
-            <button onClick={() => remover(it.idProduto)} style={{ marginLeft: 8 }}>Remover</button>
-          </li>
-        ))}
-      </ul>
-      <hr />
-      <h3>Total: R$ {total.toFixed(2)}</h3>
-    </div>
-  );
-};
-
-export default Carrinho;
+export default Carrinho
